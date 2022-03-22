@@ -10,31 +10,67 @@ class User:
 
     def create(self):
         
-        query = f"INSERT INTO users (username) VALUES (?)"
+        try:
+            query = f"INSERT INTO users (username) VALUES (?)"
+            cursor = conn.cursor(prepared=True)
+            cursor.execute(query, (self.username,))
+            conn.commit()
+            self.id = cursor.lastrowid
+            cursor.close()
+            
+        except Exception as ex:
+            conn.rollback()
+            raise ex
+    
+    def update(self):
+        try:
+            query = f"UPDATE users SET username = ? WHERE id = ?"
+            cursor = conn.cursor(prepared=True)
+            cursor.execute(query, (self.username, self._id))
+            conn.commit()
+            cursor.close()
+        except Exception as ex:
+            conn.rollback()
+            raise ex
+    
+    @staticmethod
+    def get_by_id(_id):
+        query = "SELECT * FROM users WHERE id = ?"
         cursor = conn.cursor(prepared=True)
-        cursor.execute(query, (self.username,))
-        conn.commit()
-        self.id = cursor.lastrowid
-        cursor.close()
+        cursor.execute(query, (_id,))
+        user = cursor.fetchone()
+        return User(user[1], _id=user[0])
 
-
-
-        conn.commit()
-
-        print(cursor.rowcount, "record inserted.")
-
+        
+    @staticmethod
     def get_all():
         users = []
         cursor = conn.cursor()
         cursor.execute('SELECT * FROM users')
         for u in cursor.fetchall():
-            users.append(User(u[0]))
+            users.append(User(u[1], _id=u[0]))
         cursor.close()
         
         return users
+    
+    @staticmethod
+    def delete_by_id(_id):
+        try:
+            query = "DELETE FROM users WHERE id = ?"
+            print(query)
+            cursor = conn.cursor(prepared=True)
+            cursor.execute(query, (_id, ))
+            conn.commit()
+        except Exception as ex:
+            conn.rollback()
+            raise ex
+        
+    
         
         
         
+User.delete_by_id(4)
 
-juhani = User('juhanimysql')
-juhani.create()
+
+
+
