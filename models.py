@@ -10,3 +10,74 @@ client = pymongo.MongoClient("mongodb+srv://web_nosql_db:a1XiUzqY9kHqxOed@cluste
 server_api=ServerApi('1'))
 # db nimi voi olla muukin kuin group1
 db = client.group1
+
+class User:
+    def __init__(self, username, _id=None):
+        self.username = username
+        
+        if _id is not None:
+            _id = str(_id)
+        self._id = _id
+    
+    # CRUD:n U
+    def update(self):
+        db.users.update_one(
+            {'_id': ObjectId(self._id)}, {
+            '$set': {'username': self.username}
+        })
+    
+    def create(self):
+        result = db.users.insert_one({'username': self.username})
+        self._id = str(result.inserted_id)
+    
+    # CRUD:n R (kaikki käyttäjät)
+    @staticmethod
+    def get_all():
+        
+        users = []
+        users_cursor = db.users.find()
+        for user in users_cursor:
+            users.append(User(user['username'], _id=str(user['_id'])))
+        return users
+    
+    # CRUD:n D (staattisella metodilla)
+    @staticmethod
+    def delete_by_id(_id):
+        db.users.delete_one({'_id': ObjectId(_id)})
+
+    #CRUD:n R (yksi käyttäjä _id:llä haettuna)
+    @staticmethod
+    def get_by_id(_id):
+        user = db.users.find_one({'_id': ObjectId(_id)})
+        return User(user['username'], _id=str(user['_id']))
+    
+    # CRUD:n D (Delete, eli yksittäisen käyttäjän poisto)
+    def delete(self):
+        db.users.delete_one({'_id': ObjectId(self._id)})
+
+    
+    @staticmethod
+    def list_to_json(user_list):
+        json_list = []
+        for user in user_list:
+            user_in_json_format = user.to_json()
+            json_list.append(user_in_json_format)
+        return json_list
+    
+    def to_json(self):
+        user_in_json_format = {
+            '_id': str(self._id),
+            'username': self.username
+        }
+        return user_in_json_format
+    
+    
+
+
+
+
+
+
+
+
+
