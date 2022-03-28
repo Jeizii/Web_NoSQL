@@ -1,6 +1,8 @@
 import json
 from flask import jsonify, request
-from models import db, User
+from models import db
+# from mysql_models import User
+from models import User
 
 from bson.objectid import ObjectId
 
@@ -8,13 +10,24 @@ from bson.objectid import ObjectId
 def users_route_handler():
     if request.method == 'GET':
         # users tarkoittaa collectionia / table
+        # kun luokan funktio / metodi on @staticmethod
+        # sitä kutsutaan käyttäen luokan nimeä (isolla kirjaimella) 
        users_list = User.get_all()
        return jsonify(users=User.list_to_json(users_list)) 
     elif request.method == 'POST':
         request_body = request.get_json()
         username = request_body['username']
-        new_user = User(username)
-        new_user.create()
+        # new_user = User(username)
+        # koska create ei ole @staticmethod
+        # sille ei anneta argumenttina selfiä, vaikka
+        # se createssa otetaankin ensimmäisenä vastaan
+        # self viittaa create-funktion kutsun vasemmalla puolella
+        # olevaan muuttujaan (new_user)
+        # new_user.create()
+
+        new_user = User.create_user(username)
+
+
         return jsonify(user=new_user.to_json())
 
 

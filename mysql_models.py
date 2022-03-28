@@ -19,6 +19,7 @@ class User:
             cursor.close()
             
         except Exception as ex:
+            print(ex)
             conn.rollback()
             raise ex
     
@@ -57,19 +58,34 @@ class User:
     def delete_by_id(_id):
         try:
             query = "DELETE FROM users WHERE id = ?"
-            print(query)
+            
             cursor = conn.cursor(prepared=True)
             cursor.execute(query, (_id, ))
             conn.commit()
         except Exception as ex:
             conn.rollback()
             raise ex
+    
+    def to_json(self):
+        return {
+            '_id': self._id,
+            'username': self.username
+        }
+    
+    @staticmethod
+    def list_to_json(user_list):
+        users = []
+        for user in user_list:
+            users.append(user.to_json())
+        return users
+
+
         
     
         
         
         
-User.delete_by_id(4)
+
 
 
 

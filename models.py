@@ -11,6 +11,28 @@ server_api=ServerApi('1'))
 # db nimi voi olla muukin kuin group1
 db = client.group1
 
+# jokaiselle MongoDB:n collectionille / esim. MySQL tablelle
+# tehdään luokka (tämä luokka on ns. model-luokka)
+# jokainen model-luokka sisältää samat tiedot, kuin tietokannan 
+# collection / table (esim. username)
+
+# model-luokkaan kuuluu CRUD:n toiminallisuudet, joista jokainen
+# on model-luokan funktio / metodi
+
+# CRUD
+# C => create()
+# R => get_all() ja get_by_id()
+# U => update()
+# D => delete()
+
+# mitä hyötyä modelista sitten on, 
+# jos CRUD:n voi tehdä suoraan controlleriinkin?
+
+# koska Separation of Concerns
+# Käytännössä Separation of Corncerns tarkoittaa tässä sitä, että 
+# controllerin tehtävä on huolehtia route_handlereista, 
+# eikä tietokantahauista
+
 class User:
     def __init__(self, username, _id=None):
         self.username = username
@@ -25,11 +47,19 @@ class User:
             {'_id': ObjectId(self._id)}, {
             '$set': {'username': self.username}
         })
-    
+    # kun classin funktio / metodi ei ole @staticmethod
+    # sen ensimmäinen argumentti on self
+    # selfin kautta pääsee kaikkiin luokan muuttujiin käsiksi
+    # self.username
     def create(self):
         result = db.users.insert_one({'username': self.username})
         self._id = str(result.inserted_id)
     
+    @staticmethod
+    def create_user(username):
+        result = db.users.insert_one({'username': username})
+        return User(username, _id=result.inserted_id)
+        
     # CRUD:n R (kaikki käyttäjät)
     @staticmethod
     def get_all():
