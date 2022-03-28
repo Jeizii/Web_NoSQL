@@ -1,3 +1,4 @@
+from pydoc import visiblename
 from flask import Flask, jsonify, request
 import pymongo
 from pymongo.server_api import ServerApi
@@ -32,6 +33,81 @@ db = client.group1
 # Käytännössä Separation of Corncerns tarkoittaa tässä sitä, että 
 # controllerin tehtävä on huolehtia route_handlereista, 
 # eikä tietokantahauista
+
+
+class Publication:
+    def __init__(
+        self, 
+        title, # pakollinen
+        description, # pakollinen
+        url, # pakollinen 
+        owner=None, 
+        likes=[],
+        shares=0,
+        share_link=None,
+        comments=[],
+        visibility=2,  
+        # 2: kaikille julkinen 
+        # 1: näkyy vain kirjautuneille
+        # 0: näkyy vain julkaisun omistajalle + admin
+        _id=None
+
+    ):
+        self.title = title
+        self.description = description
+        self.url = url
+        self.owner = owner
+        self.likes = likes
+        self.shares = shares
+        self.share_link = share_link
+        self.comments = comments
+        self.visibility = visibility
+        if _id is not None:
+            # jotta jsonify ei epäonnistu, _id pitää muuttaa str-funktiolla
+            # merkkijonoksi
+            _id = str(_id)
+        self._id = _id
+
+    
+    def create(self):
+        title = self.title
+        description = self.description
+        url = self.url
+        owner = self.owner
+        likes = self.likes
+        shares = self.shares
+        share_link = self.share_link
+        comments = self.comments
+        visibility = self.visibility
+        result = db.publications.insert_one({
+            'title': title,
+            'description': description,
+            'url': url,
+            'owner': owner,
+            'likes': likes,
+            'shares': shares,
+            'share_link': share_link,
+            'comments': comments,
+            'visibility': visibility
+        })
+        new_id = result.inserted_id
+        self._id = str(new_id)
+        
+        
+
+        
+        
+    
+    def to_json(self):
+        print("to_json", self._id)
+        publication_in_json_format = {
+            '_id': str(self._id),
+            'title': self.title,
+            'description': self.description
+        }
+
+        return publication_in_json_format
+        
 
 class User:
     def __init__(self, username, _id=None):
