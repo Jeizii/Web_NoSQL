@@ -6,7 +6,11 @@ from models import Publication
 
 def publications_route_handler():
     if request.method == 'GET':
-        return jsonify(publications=[])
+        publications = Publication.get_all()
+        # print("########## publications", publications)
+        publications_in_json_format = Publication.list_to_json(publications)
+        return jsonify(publications=publications_in_json_format)
+        
     elif request.method == 'POST':
         request_body = request.get_json()
         title = request_body['title']

@@ -17,17 +17,15 @@ def users_route_handler():
     elif request.method == 'POST':
         request_body = request.get_json()
         username = request_body['username']
-        # new_user = User(username)
+        password  = request_body['password']
+        role = request_body['role']
+        new_user = User(username, password=password, role=role)
         # koska create ei ole @staticmethod
         # sille ei anneta argumenttina selfiä, vaikka
         # se createssa otetaankin ensimmäisenä vastaan
         # self viittaa create-funktion kutsun vasemmalla puolella
         # olevaan muuttujaan (new_user)
-        # new_user.create()
-
-        new_user = User.create_user(username)
-
-
+        new_user.create()
         return jsonify(user=new_user.to_json())
 
 

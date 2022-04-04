@@ -1,4 +1,6 @@
+from copyreg import constructor
 from pydoc import visiblename
+from click import argument
 from flask import Flask, jsonify, request
 import pymongo
 from pymongo.server_api import ServerApi
@@ -67,6 +69,47 @@ class Publication:
             # merkkijonoksi
             _id = str(_id)
         self._id = _id
+    
+    """ class PublicationService {
+        # def __init__(self)
+        constructor(argument1) {
+            # self = this
+            this.argument1 = argument
+        }
+    } """
+    
+    @staticmethod
+    def list_to_json(publications_list): # [models.Publication,....]
+        publications_in_json_fomat = []
+        for publication_object in publications_list: # publication_object = models.Publication
+            publication_object_in_json_format = publication_object.to_json() # {'title': 'eka'}
+            # [{'title': 'eka',...}]
+            publications_in_json_fomat.append(publication_object_in_json_format)
+        
+        return publications_in_json_fomat
+
+    
+    @staticmethod
+    # on tavanmukaista, että model-luokan @staticmethod, jolla haetaan tietoa
+    # palauttavat ko. luokan tyyppisiä muuttujia
+    def get_all():
+        publications = []
+        publications_cursor = db.publications.find()
+        for publication in publications_cursor:
+
+            title = publication['title']
+            description = publication['description']
+            url = publication['url']
+            _id = publication['_id']
+
+
+            publication_object = Publication(title, description, url, _id=_id)
+            publications.append(publication_object)
+
+            # print("#publication#", publication)
+            # print("# type #", type(publication))
+        return publications
+
 
     
     def create(self):
@@ -99,7 +142,7 @@ class Publication:
         
     
     def to_json(self):
-        print("to_json", self._id)
+        
         publication_in_json_format = {
             '_id': str(self._id),
             'title': self.title,
@@ -110,12 +153,19 @@ class Publication:
         
 
 class User:
-    def __init__(self, username, _id=None):
+    def __init__(self, username, password=None, role='user', _id=None):
         self.username = username
+        self.password = password
+        self.role = role
         
         if _id is not None:
             _id = str(_id)
         self._id = _id
+    
+    @staticmethod
+    def get_by_username(username):
+        user = db.users.find_one({'username': username})
+        return user
     
     # CRUD:n U
     def update(self):
@@ -128,13 +178,15 @@ class User:
     # selfin kautta pääsee kaikkiin luokan muuttujiin käsiksi
     # self.username
     def create(self):
-        result = db.users.insert_one({'username': self.username})
+        # TODO: hash password
+        result = db.users.insert_one({'username': self.username, 
+        'password': self.password, 'role': self.role})
         self._id = str(result.inserted_id)
     
-    @staticmethod
+    """ @staticmethod
     def create_user(username):
         result = db.users.insert_one({'username': username})
-        return User(username, _id=result.inserted_id)
+        return User(username, _id=result.inserted_id) """
         
     # CRUD:n R (kaikki käyttäjät)
     @staticmethod
@@ -173,7 +225,8 @@ class User:
     def to_json(self):
         user_in_json_format = {
             '_id': str(self._id),
-            'username': self.username
+            'username': self.username,
+            'role': self.role
         }
         return user_in_json_format
     
