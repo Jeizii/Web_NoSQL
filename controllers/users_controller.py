@@ -6,7 +6,8 @@ from models import User
 
 from bson.objectid import ObjectId
 
-
+# /api/users
+# POST-ehtoon pääsee vaan admin
 def users_route_handler():
     if request.method == 'GET':
         # users tarkoittaa collectionia / table

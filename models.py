@@ -5,6 +5,7 @@ from flask import Flask, jsonify, request
 import pymongo
 from pymongo.server_api import ServerApi
 from bson.objectid import ObjectId
+from passlib.hash import pbkdf2_sha256 as sha256
 
 # tätä voi käyttää, jos on paikallinen mongodb-palvelin asennettuna
 # mongodb://localhost:27017/
@@ -165,7 +166,11 @@ class User:
     @staticmethod
     def get_by_username(username):
         user = db.users.find_one({'username': username})
-        return user
+        return User(username, 
+        password=user['password'], 
+        role=user['role'], 
+        _id=user['_id'])
+    
     
     # CRUD:n U
     def update(self):
@@ -180,13 +185,10 @@ class User:
     def create(self):
         # TODO: hash password
         result = db.users.insert_one({'username': self.username, 
-        'password': self.password, 'role': self.role})
+        'password': sha256.hash(self.password), 'role': self.role})
         self._id = str(result.inserted_id)
     
-    """ @staticmethod
-    def create_user(username):
-        result = db.users.insert_one({'username': username})
-        return User(username, _id=result.inserted_id) """
+    
         
     # CRUD:n R (kaikki käyttäjät)
     @staticmethod
@@ -229,6 +231,10 @@ class User:
             'role': self.role
         }
         return user_in_json_format
+
+
+
+
     
     
 
