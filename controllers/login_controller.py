@@ -1,4 +1,4 @@
-from flask import jsonify, request
+from flask import jsonify, make_response, request
 from passlib.hash import pbkdf2_sha256 as sha256
 from flask_jwt_extended import create_access_token
 
@@ -13,6 +13,8 @@ def login_route_handler():
         username = request_body['username']
         password = request_body['password']
         user = User.get_by_username(username)
+        """ if user is None:
+            return make_response({'not found'}, 404) """
         password_ok = sha256.verify(password, user.password)
         if password_ok is True:
             access_token = create_access_token(

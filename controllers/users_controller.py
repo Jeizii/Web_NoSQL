@@ -3,11 +3,13 @@ from flask import jsonify, request
 from models import db
 # from mysql_models import User
 from models import User
+from flask_jwt_extended import jwt_required
 
 from bson.objectid import ObjectId
 
 # /api/users
 # POST-ehtoon pääsee vaan admin
+@jwt_required()
 def users_route_handler():
     if request.method == 'GET':
         # users tarkoittaa collectionia / table

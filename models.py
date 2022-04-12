@@ -7,6 +7,8 @@ from pymongo.server_api import ServerApi
 from bson.objectid import ObjectId
 from passlib.hash import pbkdf2_sha256 as sha256
 
+from errors.not_found import NotFound
+
 # tätä voi käyttää, jos on paikallinen mongodb-palvelin asennettuna
 # mongodb://localhost:27017/
 
@@ -166,6 +168,8 @@ class User:
     @staticmethod
     def get_by_username(username):
         user = db.users.find_one({'username': username})
+        if user is None:
+            raise NotFound(message='User not found')
         return User(username, 
         password=user['password'], 
         role=user['role'], 

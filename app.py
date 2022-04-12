@@ -1,6 +1,6 @@
 # tässä on MCV: osa C eli controller
 
-from flask import Flask
+from flask import Flask, jsonify
 from controllers.login_controller import login_route_handler
 from controllers.publications_controller import publications_route_handler
 from controllers.register_controller import register_route_handler
@@ -8,12 +8,18 @@ from controllers.register_controller import register_route_handler
 from controllers.users_controller import user_route_handler, users_route_handler
 from flask_jwt_extended import JWTManager
 
+from errors.not_found import NotFound
+
 
 
 # Flask(__name__) merkitys selviää, kun päästään luokkiin asti
 app = Flask(__name__)
 app.config.from_object('config.Config')
 jwt = JWTManager(app)
+
+@app.errorhandler(NotFound)
+def handle_not_found(err):
+    return jsonify(err=err.args[0]), 404
 
 app.add_url_rule('/api/users', view_func=users_route_handler, methods=['GET', 'POST'])
 app.add_url_rule('/api/users/<_id>', view_func=user_route_handler, methods=['GET', 'DELETE', 'PATCH'])
