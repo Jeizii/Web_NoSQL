@@ -9,6 +9,8 @@ from passlib.hash import pbkdf2_sha256 as sha256
 from config import Config
 from errors.not_found import NotFound
 
+from errors.not_found import NotFound
+
 # tätä voi käyttää, jos on paikallinen mongodb-palvelin asennettuna
 # mongodb://localhost:27017/
 print(Config.CONNECT_STR)
