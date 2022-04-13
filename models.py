@@ -6,11 +6,13 @@ import pymongo
 from pymongo.server_api import ServerApi
 from bson.objectid import ObjectId
 from passlib.hash import pbkdf2_sha256 as sha256
+from config import Config
+from errors.not_found import NotFound
 
 # tätä voi käyttää, jos on paikallinen mongodb-palvelin asennettuna
 # mongodb://localhost:27017/
-
-client = pymongo.MongoClient("mongodb+srv://web_nosql_db:a1XiUzqY9kHqxOed@cluster0.rr8t2.mongodb.net/?retryWrites=true&w=majority", 
+print(Config.CONNECT_STR)
+client = pymongo.MongoClient(Config.CONNECT_STR, 
 server_api=ServerApi('1'))
 # db nimi voi olla muukin kuin group1
 db = client.group1
@@ -71,13 +73,11 @@ class Publication:
             _id = str(_id)
         self._id = _id
     
-    """ class PublicationService {
-        # def __init__(self)
-        constructor(argument1) {
-            # self = this
-            this.argument1 = argument
-        }
-    } """
+    
+    
+    @staticmethod
+    def get_by_owner_and_visibility(user={}, visibility=[2]):
+        pass
     
     @staticmethod
     def list_to_json(publications_list): # [models.Publication,....]
@@ -166,6 +166,8 @@ class User:
     @staticmethod
     def get_by_username(username):
         user = db.users.find_one({'username': username})
+        if user is None:
+            raise NotFound(message='User not found')
         return User(username, 
         password=user['password'], 
         role=user['role'], 
