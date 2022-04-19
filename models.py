@@ -1,7 +1,5 @@
-from copyreg import constructor
-from pydoc import visiblename
-from click import argument
-from flask import Flask, jsonify, request
+
+
 import pymongo
 from pymongo.server_api import ServerApi
 from bson.objectid import ObjectId
@@ -75,11 +73,83 @@ class Publication:
             _id = str(_id)
         self._id = _id
     
-    
+    @staticmethod
+    def get_by_visibility(visibility=2):
+        _filter = {
+            'visibility': visibility
+        }
+        publications = []
+        publications_cursor = db.publications.find(_filter)
+        for publication in publications_cursor:
+
+            title = publication['title']
+            description = publication['description']
+            url = publication['url']
+            owner = publication['owner']
+            likes = publication['likes']
+            shares = publication['shares']
+            share_link = publication['share_link']
+            comments = publication['comments']
+            visibility = publication['visibility']
+            _id = publication['_id']
+            
+            publication_object = Publication(title, 
+            description, 
+            url, 
+            owner=owner, 
+            likes=likes,
+            shares=shares,
+            share_link=share_link,
+            comments=comments,
+            visibility=visibility,
+            _id=_id)
+
+            publications.append(publication_object)
+        
+        return publications 
+
+
     
     @staticmethod
     def get_by_owner_and_visibility(user={}, visibility=[2]):
-        pass
+        # hae kaikki julkaisut, joiden omistaja olen tai visibility on visibility listassa
+        # _filter = { '$or': [ { 'onwer': ObjectId('624aab5993ebadc4c273def2') }, { visibility: {$in: [1,2]} } ] }
+        _filter = {
+            '$or': [
+                {'owner': ObjectId(user['sub'])},
+                {'visibility': {'$in': visibility}}
+
+            ]
+        }
+        publications = []
+        publications_cursor = db.publications.find(_filter)
+        for publication in publications_cursor:
+
+            title = publication['title']
+            description = publication['description']
+            url = publication['url']
+            owner = publication['owner']
+            likes = publication['likes']
+            shares = publication['shares']
+            share_link = publication['share_link']
+            comments = publication['comments']
+            visibility = publication['visibility']
+            _id = publication['_id']
+            
+            publication_object = Publication(title, 
+            description, 
+            url, 
+            owner=owner, 
+            likes=likes,
+            shares=shares,
+            share_link=share_link,
+            comments=comments,
+            visibility=visibility,
+            _id=_id)
+
+            publications.append(publication_object)
+        
+        return publications 
     
     @staticmethod
     def list_to_json(publications_list): # [models.Publication,....]
@@ -103,10 +173,24 @@ class Publication:
             title = publication['title']
             description = publication['description']
             url = publication['url']
+            owner = publication['owner']
+            likes = publication['likes']
+            shares = publication['shares']
+            share_link = publication['share_link']
+            comments = publication['comments']
+            visibility = publication['visibility']
             _id = publication['_id']
-
-
-            publication_object = Publication(title, description, url, _id=_id)
+            
+            publication_object = Publication(title, 
+            description, 
+            url, 
+            owner=owner, 
+            likes=likes,
+            shares=shares,
+            share_link=share_link,
+            comments=comments,
+            visibility=visibility,
+            _id=_id)
             publications.append(publication_object)
 
             # print("#publication#", publication)
@@ -145,11 +229,22 @@ class Publication:
         
     
     def to_json(self):
-        
+        owner = self.owner
+        if owner is not None:
+            owner = str(owner)
+        likes = self.likes
+        for user in likes:
+            user = str(user)
         publication_in_json_format = {
             '_id': str(self._id),
             'title': self.title,
-            'description': self.description
+            'description': self.description,
+            'owner':owner,
+            'shares': self.shares,
+            'likes': likes,
+            'share_link': self.share_link,
+            'visibility': self.visibility,
+            
         }
 
         return publication_in_json_format

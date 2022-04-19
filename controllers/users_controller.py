@@ -9,7 +9,7 @@ from bson.objectid import ObjectId
 
 # /api/users
 # POST-ehtoon pääsee vaan admin
-@jwt_required()
+
 def users_route_handler():
     if request.method == 'GET':
         # users tarkoittaa collectionia / table
