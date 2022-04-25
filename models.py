@@ -74,6 +74,35 @@ class Publication:
         self._id = _id
     
     @staticmethod
+    def get_by_id(_id):
+        publication = db.publications.find_one({'_id': ObjectId(_id)})
+        title = publication['title']
+        description = publication['description']
+        url = publication['url']
+        owner = publication['owner']
+        likes = publication['likes']
+        shares = publication['shares']
+        share_link = publication['share_link']
+        comments = publication['comments']
+        visibility = publication['visibility']
+        _id = publication['_id']
+        
+        publication_object = Publication(title, 
+        description, 
+        url, 
+        owner=owner, 
+        likes=likes,
+        shares=shares,
+        share_link=share_link,
+        comments=comments,
+        visibility=visibility,
+        _id=_id)
+
+        return publication_object
+
+        
+    
+    @staticmethod
     def get_by_visibility(visibility=2):
         _filter = {
             'visibility': visibility

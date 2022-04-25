@@ -6,6 +6,12 @@ from bson.objectid import ObjectId
 from models import Publication
 
 @jwt_required(optional=True)
+def publication_route_handler(_id):
+    publication = Publication.get_by_id(_id)
+    return jsonify(publication=publication.to_json())
+
+
+@jwt_required(optional=True)
 def publications_route_handler():
     logged_in_user = get_jwt()
     if request.method == 'GET':

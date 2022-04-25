@@ -7,6 +7,8 @@ from flask_jwt_extended import jwt_required
 
 from bson.objectid import ObjectId
 
+from validators.account import validate_account
+
 # /api/users
 # POST-ehtoon pääsee vaan admin
 
