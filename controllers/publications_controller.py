@@ -3,26 +3,44 @@ from flask import jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt
 from bson.objectid import ObjectId
 from errors.not_found import NotFound
+from errors.validation_error import ValidationError
 
 from models import Publication
 
 @jwt_required(optional=True)
 def publication_route_handler(_id):
-    logged_in_user = get_jwt()
     if request.method == 'GET':
+        # 1 tee models.py-tiedostoon Publication-classiin static method get_by_id,
         publication = Publication.get_by_id(_id)
+        
+        # joka hakee _id:n perusteella valitun publicationin
+        # 2. palauta publication jsonifylla
         return jsonify(publication=publication.to_json())
     elif request.method == 'DELETE':
-        publication = Publication.get_by_id(_id)
-        if logged_in_user: # onko käyttäjä kirjautunut sisään 
-            # (löytyy authorization header ja jwt on typea access ja on voimassa)
-            if logged_in_user['role'] == 'admin': # admin voi poistaa kaikki riippumatta omistajasta
-                pass
-            elif logged_in_user['role'] == 'user':
-                # tarkistetaan, että käyttäjän _id (logged_in_user['sub']) 
-                # on sama kuin publication.owner
+        logged_in_user = get_jwt()
+        if logged_in_user:
+            if logged_in_user['role'] == 'user':
+                publication = Publication.get_by_id(_id)
                 if publication.owner is not None and str(publication.owner) == logged_in_user['sub']:
                     publication.delete()
+                raise NotFound(message='Publication not found')
+        raise NotFound(message='Publication not found')
+    elif request.method == 'PATCH':
+        logged_in_user = get_jwt()
+        if logged_in_user:
+            if logged_in_user['role'] == 'user':
+                publication = Publication.get_by_id(_id)
+                if publication.owner is not None and str(publication.owner) == logged_in_user['sub']:
+                    request_body = request.get_json()
+                    if request_body:
+                        if 'title' in request_body and 'description' in request_body:
+                            publication.title = request_body['title']
+                            publication.description = request_body['description']
+                            publication.update()
+                            return jsonify(publication=publication.to_json())
+                        raise ValidationError(message='Title and description are required')
+                    raise ValidationError(message='Body is required')
+
                 raise NotFound(message='Publication not found')
         raise NotFound(message='Publication not found')
 
