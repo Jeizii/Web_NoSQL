@@ -76,12 +76,15 @@ class Publication:
         self._id = _id
     
     def share(self, length=8):
+        _filter= {'_id': ObjectId(self._id)}
         if self.share_link is None:
             letters = string.ascii_lowercase
             self.share_link = ''.join(random.choice(letters) for i in range(length))
-            _filter= {'_id': ObjectId(self._id)}
-            _update = {'$set': {'share_link': self.share_link}}
-            db.publications.update_one(_filter, _update)
+            
+            _update = {'$set': {'share_link': self.share_link}, '$inc': {'shares':1}}
+        else:
+            _update = {'$inc': {'shares': 1}}
+        db.publications.update_one(_filter, _update)
     
     def like(self):
         _filter= {'_id': ObjectId(self._id)}
