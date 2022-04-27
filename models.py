@@ -1,5 +1,7 @@
 
 
+import random
+import string
 import pymongo
 from pymongo.server_api import ServerApi
 from bson.objectid import ObjectId
@@ -73,9 +75,32 @@ class Publication:
             _id = str(_id)
         self._id = _id
     
+    def share(self, length=8):
+        if self.share_link is None:
+            letters = string.ascii_lowercase
+            self.share_link = ''.join(random.choice(letters) for i in range(length))
+            _filter= {'_id': ObjectId(self._id)}
+            _update = {'$set': {'share_link': self.share_link}}
+            db.publications.update_one(_filter, _update)
+    
+    def like(self):
+        _filter= {'_id': ObjectId(self._id)}
+        _update = {'$set': {'likes': self.likes}}
+        db.publications.update_one(_filter, _update)
+    
+    # CRUD:n D (Delete, eli yksittäisen julkaisun poisto)
+    def delete(self): # controllerissa publication.delete() => publication-muuttuja on self
+        db.publications.delete_one({'_id': ObjectId(self._id)})
+    
+    @staticmethod
+    def delete_by_id(_id):
+        db.publications.delete_one({'_id': ObjectId(_id)})
+    
     @staticmethod
     def get_by_id(_id):
         publication = db.publications.find_one({'_id': ObjectId(_id)})
+        if publication is None:
+            raise NotFound(message='Publication not found')
         title = publication['title']
         description = publication['description']
         url = publication['url']
@@ -262,8 +287,9 @@ class Publication:
         if owner is not None:
             owner = str(owner)
         likes = self.likes
-        for user in likes:
-            user = str(user)
+        for i,  user in enumerate(likes):
+            likes[i] = str(user)
+        
         publication_in_json_format = {
             '_id': str(self._id),
             'title': self.title,
@@ -337,6 +363,8 @@ class User:
     @staticmethod
     def get_by_id(_id):
         user = db.users.find_one({'_id': ObjectId(_id)})
+        if user is None:
+            raise NotFound(message='User not found')
         return User(user['username'], _id=str(user['_id']))
     
     # CRUD:n D (Delete, eli yksittäisen käyttäjän poisto)

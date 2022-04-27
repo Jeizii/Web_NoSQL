@@ -39,9 +39,9 @@ def user_route_handler(_id):
         user = User.get_by_id(_id)
         return jsonify(user=user.to_json())
     elif request.method == 'DELETE':
-        # user = User.get_by_id(_id)
-        # user.delete()
-        User.delete_by_id(_id)
+        user = User.get_by_id(_id)
+        user.delete()
+        #User.delete_by_id(_id)
         return ""
     elif request.method == 'PATCH':
         request_body = request.get_json()
