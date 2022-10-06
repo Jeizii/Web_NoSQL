@@ -5,12 +5,30 @@ from models import db
 from models import User
 from flask_jwt_extended import jwt_required
 
-from bson.objectid import ObjectId
+#from bson.objectid import ObjectId
 
 from validators.account import validate_account
+users = []
 
 # /api/users
 # POST-ehtoon pääsee vaan admin
+
+def users_handler():
+    # jos request.method == 'GET' tarkoittaa,
+    # että insomiasta/ postmanista on valittu GET-metodi
+    if request.method == 'GET':
+    #jsonify-funktio on osa flask pakettia
+    #Se muuttaa python-objektin JSON-muotoon.
+    #Lisäksi muuttaa HTTP-responsen content-type headerin application/jsoniksi
+    # katsotaan tästä esimerkki insomialla.
+        return jsonify(users=users)
+    
+    elif request.method == 'POST':
+        req_body = request.get_json()
+        new_user = {'_id': len(users) + 1, 'username': req_body['username']}
+        users.append(new_user)
+        return jsonify(user=new_user)
+    
 
 def users_route_handler():
     if request.method == 'GET':

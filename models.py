@@ -14,10 +14,10 @@ from errors.not_found import NotFound
 # tätä voi käyttää, jos on paikallinen mongodb-palvelin asennettuna
 # mongodb://localhost:27017/
 print(Config.CONNECT_STR)
-client = pymongo.MongoClient(Config.CONNECT_STR, 
-server_api=ServerApi('1'))
+client = pymongo.MongoClient("mongodb+srv://MongoDB:<jcandeki123>@cluster0.ym6im.mongodb.net/myFirstDatabase?retryWrites=true&w=majority", server_api=ServerApi('1'))
+
+db = client.test
 # db nimi voi olla muukin kuin group1
-db = client.group1
 
 # jokaiselle MongoDB:n collectionille / esim. MySQL tablelle
 # tehdään luokka (tämä luokka on ns. model-luokka)
@@ -265,7 +265,7 @@ class Publication:
         share_link = self.share_link
         comments = self.comments
         visibility = self.visibility
-        result = db.publications.insert_one({
+        result = db.Publications.insert_one({
             'title': title,
             'description': description,
             'url': url,

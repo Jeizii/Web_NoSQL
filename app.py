@@ -1,6 +1,6 @@
 # tässä on MCV: osa C eli controller
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, make_response
 from controllers.account_controller import AccountRouteHandler, account_password_route_handler
 from controllers.login_controller import login_route_handler
 from controllers.publications_controller import like_publication_route_handler, publication_route_handler, publications_route_handler, share_publication_route_handler
@@ -18,6 +18,17 @@ from errors.validation_error import ValidationError
 app = Flask(__name__)
 app.config.from_object('config.Config')
 jwt = JWTManager(app)
+
+@app.route('/hello_world')
+def hello_world_route_handler():
+    response = make_response ('Moi moi taa on sun eka appis')
+    return response
+
+@app.route('/another_route')
+def another_route_route_handler():
+    response = make_response('Moi taa on sun toka sivu')
+    return response
+
 
 @app.errorhandler(NotFound)
 def handle_not_found(err):
